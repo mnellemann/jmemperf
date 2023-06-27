@@ -30,28 +30,41 @@ public class MyDatabase {
     private final int maxRowsPerTable;
     private final int maxDataPerRow;
 
+    private int idx = 0;
+    private int idx2 = 0;
+    private char[] baseCar;
+    private byte[] byteBase;
+
     public MyDatabase(int tables, int rows, int size) {
         this.maxTables = tables;
         this.maxRowsPerTable = rows;
         this.maxDataPerRow = size;
+        baseCar = new char[128];
+        byteBase = new byte[BYTE_SIZE_1MB];
+        for (int i = 0; i < 128; i++) {
+            baseCar[i] = 'A';
+        }
+        for (int i = 0; i < byteBase.length; i++) {
+            byteBase[i] = 0;
+        }
     }
 
 
     public Database build(String dbName) {
         Instant instant1 = Instant.now();
         Database database = databaseManager.createDatabase(dbName);
-        for(int t = 1; t <= maxTables; t++) {
+        for (int t = 1; t <= maxTables; t++) {
 
             String tableName = String.format("table_%d", t);
             log.info("Creating table \"{}\"", tableName);
 
             Table table = database.createTable(tableName);
 
-            for(int r = 1; r <= maxRowsPerTable; r++) {
+            for (int r = 1; r <= maxRowsPerTable; r++) {
                 String rowIdx = String.format("%d_of_%d", r, maxRowsPerTable);
-                HashMap<String, ByteBuffer> map = new HashMap<String,ByteBuffer>();
-                for(int m = 1; m <= maxDataPerRow; m++) {
-                    map.put(randomString(128), ByteBuffer.wrap(randomBytes(BYTE_SIZE_1MB)) );
+                HashMap<String, ByteBuffer> map = new HashMap<String, ByteBuffer>();
+                for (int m = 1; m <= maxDataPerRow; m++) {
+                    map.put(randomString(), randomBytes());
                 }
                 table.insertEntry(rowIdx, map);
             }
@@ -64,22 +77,20 @@ public class MyDatabase {
         return database;
     }
 
+    String randomString() {
+        baseCar[(idx++) % 128]++;
+        String s = new String(baseCar);
+        return s;
+    }
 
-    String randomString(final int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for(int l = 0; l < length; l++) {
-            sb.append( (char) random.nextInt(65_535));
+    ByteBuffer randomBytes() {
+        byteBase[(idx2++) % byteBase.length]++;
+        byte[] bytes = new byte[byteBase.length];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = byteBase[i];
         }
-        return sb.toString();
+        return ByteBuffer.wrap(bytes);
     }
-
-
-    byte[] randomBytes(final int length) {
-        byte[] randomArray = new byte[length];
-        random.nextBytes(randomArray);
-        return randomArray;
-    }
-
 
     void destroy(final String dbName) {
         databaseManager.deleteDatabase(dbName);
