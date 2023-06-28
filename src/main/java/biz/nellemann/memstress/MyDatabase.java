@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -44,9 +45,7 @@ public class MyDatabase {
         for (int i = 0; i < 128; i++) {
             baseCar[i] = 'A';
         }
-        for (int i = 0; i < byteBase.length; i++) {
-            byteBase[i] = 0;
-        }
+        Arrays.fill(byteBase, (byte) 0);
     }
 
 
@@ -79,16 +78,13 @@ public class MyDatabase {
 
     String randomString() {
         baseCar[(idx++) % 128]++;
-        String s = new String(baseCar);
-        return s;
+        return new String(baseCar);
     }
 
     ByteBuffer randomBytes() {
         byteBase[(idx2++) % byteBase.length]++;
         byte[] bytes = new byte[byteBase.length];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = byteBase[i];
-        }
+        System.arraycopy(byteBase, 0, bytes, 0, bytes.length);
         return ByteBuffer.wrap(bytes);
     }
 
