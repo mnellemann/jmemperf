@@ -27,9 +27,8 @@ public class Application implements Callable<Integer> {
     public Integer call() throws Exception {
 
         MyDatabase database = new MyDatabase(maxTables, maxRowsPerTable, maxDataPerRow);
-        database.build("testDb");
-
-        System.out.println("TODO: How to search / read from data stored in rows?");
+        database.write("testDb");
+        database.read("testDb");
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Press ENTER to stop");
