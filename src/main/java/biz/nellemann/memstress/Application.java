@@ -3,8 +3,6 @@ package biz.nellemann.memstress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
-
-import java.util.Scanner;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "memstress", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Memory performance measurement tool.")
@@ -29,12 +27,6 @@ public class Application implements Callable<Integer> {
         MyDatabase database = new MyDatabase(maxTables, maxRowsPerTable, maxDataPerRow);
         database.write("testDb");
         database.read("testDb");
-
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Press ENTER to stop");
-        String s= scanner.nextLine();
-        scanner.close();
-
         database.destroy("testDb");
 
         return 0;

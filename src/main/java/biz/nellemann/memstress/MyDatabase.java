@@ -56,7 +56,7 @@ public class MyDatabase {
         for (int t = 1; t <= maxTables; t++) {
 
             String tableName = String.format("table_%d", t);
-            log.info("Creating table \"{}\"", tableName);
+            log.debug("Creating table \"{}\"", tableName);
 
             Table table = database.createTable(tableName);
 
@@ -74,7 +74,7 @@ public class MyDatabase {
         }
 
         Instant instant2 = Instant.now();
-        log.info("Done writing {} to \"{}\" in {}", bytesWritten, dbName, Duration.between(instant1, instant2));
+        log.info("Done writing {}b to \"{}\" in {}", bytesWritten, dbName, Duration.between(instant1, instant2));
     }
 
 
@@ -87,13 +87,17 @@ public class MyDatabase {
             table.getRows().forEach((idx, row) -> {
                 HashMap<String, ByteBuffer> values = row.getColumnValuesMap();
                 values.forEach((str, byteBuffer) -> {
-                    byte[] array = byteBuffer.array();
-                    bytesRead.addAndGet(array.length);
+                    byteBuffer.rewind();
+                    while (byteBuffer.hasRemaining()) {
+                        byte[] tmp = new byte[BYTE_SIZE_1MB];
+                        byteBuffer.get(tmp);
+                        bytesRead.addAndGet(tmp.length);
+                    }
                 });
             });
         }
         Instant instant2 = Instant.now();
-        log.info("Done reading {} from \"{}\" in {}", bytesRead.get(), dbName, Duration.between(instant1, instant2));
+        log.info("Done reading {}b from \"{}\" in {}", bytesRead.get(), dbName, Duration.between(instant1, instant2));
 
     }
 
