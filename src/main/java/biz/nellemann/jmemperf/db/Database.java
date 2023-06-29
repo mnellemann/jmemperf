@@ -1,7 +1,7 @@
 /**
  * Example taken from: https://medium.com/@mithoonkumar/design-an-in-memory-nosql-database-ood-428d48b68dfa
  */
-package biz.nellemann.memstress.db;
+package biz.nellemann.jmemperf.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

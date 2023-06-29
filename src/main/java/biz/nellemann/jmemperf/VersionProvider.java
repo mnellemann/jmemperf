@@ -1,4 +1,4 @@
-package biz.nellemann.memstress;
+package biz.nellemann.jmemperf;
 
 
 import picocli.CommandLine;

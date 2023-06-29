@@ -2,7 +2,6 @@ plugins {
     id 'groovy'
     id 'application'
     id "net.nemerosa.versioning" version "2.15.1"
-    id "com.netflix.nebula.ospackage" version "11.2.0"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
@@ -30,7 +29,7 @@ java {
 }
 
 application {
-    mainClass = 'biz.nellemann.memstress.Application'
+    mainClass = 'biz.nellemann.jmemperf.Application'
 }
 
 tasks.named('test') {
@@ -54,42 +53,4 @@ jar {
                 'Build-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ss.SSSZ").toString(),
         )
     }
-}
-
-apply plugin: 'com.netflix.nebula.ospackage'
-ospackage {
-    packageName = 'memstress'
-    release = '1'
-    user = 'root'
-    packager = "Mark Nellemann <mark.nellemann@gmail.com>"
-
-    into '/opt/memstress'
-
-    from(shadowJar.outputs.files) {
-        into 'lib'
-    }
-
-    from('build/scriptsShadow') {
-        into 'bin'
-    }
-
-    from(['README.md', 'LICENSE']) {
-        into 'doc'
-    }
-
-}
-
-buildDeb {
-    dependsOn build, startShadowScripts
-}
-
-buildRpm {
-    dependsOn build, startShadowScripts
-    os = org.redline_rpm.header.Os.LINUX
-}
-
-tasks.register("packages") {
-    group "build"
-    dependsOn ":buildDeb"
-    dependsOn ":buildRpm"
 }
