@@ -1,4 +1,4 @@
-package biz.nellemann.memstress;
+package biz.nellemann.jmemperf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,7 +7,7 @@ import picocli.CommandLine;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "memstress", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Memory performance measurement tool.")
+@CommandLine.Command(name = "jmemperf", mixinStandardHelpOptions = true, versionProvider = VersionProvider.class, description = "Memory performance measurement tool.")
 public class Application implements Callable<Integer> {
 
     final Logger log = LoggerFactory.getLogger(Application.class);

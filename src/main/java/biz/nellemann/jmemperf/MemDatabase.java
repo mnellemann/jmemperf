@@ -1,8 +1,8 @@
-package biz.nellemann.memstress;
+package biz.nellemann.jmemperf;
 
-import biz.nellemann.memstress.db.Database;
-import biz.nellemann.memstress.db.DatabaseManager;
-import biz.nellemann.memstress.db.Table;
+import biz.nellemann.jmemperf.db.Database;
+import biz.nellemann.jmemperf.db.DatabaseManager;
+import biz.nellemann.jmemperf.db.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

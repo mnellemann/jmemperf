@@ -29,7 +29,7 @@ java {
 }
 
 application {
-    mainClass = 'biz.nellemann.memstress.Application'
+    mainClass = 'biz.nellemann.jmemperf.Application'
 }
 
 tasks.named('test') {
