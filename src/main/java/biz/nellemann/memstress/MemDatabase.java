@@ -14,9 +14,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class MyDatabase {
+public class MemDatabase {
 
-    final Logger log = LoggerFactory.getLogger(MyDatabase.class);
+    final Logger log = LoggerFactory.getLogger(MemDatabase.class);
 
     private final int BYTE_SIZE_1MB = 1_000_000;
     private final int BYTE_SIZE_1GB = 1_000_000_000;
@@ -35,7 +35,7 @@ public class MyDatabase {
     private char[] baseCar;
     private byte[] byteBase;
 
-    public MyDatabase(int tables, int rows, int size) {
+    public MemDatabase(int tables, int rows, int size) {
         this.maxTables = tables;
         this.maxRowsPerTable = rows;
         this.maxDataPerRow = size;
@@ -48,7 +48,7 @@ public class MyDatabase {
     }
 
 
-    public void write(String dbName) {
+    public long write(String dbName) {
         Instant instant1 = Instant.now();
         Database database = databaseManager.createDatabase(dbName);
 
@@ -74,11 +74,14 @@ public class MyDatabase {
         }
 
         Instant instant2 = Instant.now();
-        log.info("Done writing {}b to \"{}\" in {}", bytesWritten, dbName, Duration.between(instant1, instant2));
+        Duration duration = Duration.between(instant1, instant2);
+        log.info("Done writing {} bytes -> \"{}\" in {}", bytesWritten, dbName, duration);
+
+        return duration.toMillis();
     }
 
 
-    public void read(String dbName) {
+    public long read(String dbName) {
         Instant instant1 = Instant.now();
         Database database = databaseManager.getDatabase(dbName);
 
@@ -97,8 +100,10 @@ public class MyDatabase {
             });
         }
         Instant instant2 = Instant.now();
-        log.info("Done reading {}b from \"{}\" in {}", bytesRead.get(), dbName, Duration.between(instant1, instant2));
+        Duration duration = Duration.between(instant1, instant2);
+        log.info("Done reading {} bytes <- \"{}\" in {}", bytesRead.get(), dbName, duration);
 
+        return duration.toMillis();
     }
 
 
