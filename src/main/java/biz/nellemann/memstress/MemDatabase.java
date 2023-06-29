@@ -12,17 +12,16 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class MyDatabase {
+public class MemDatabase {
 
-    final Logger log = LoggerFactory.getLogger(MyDatabase.class);
+    final Logger log = LoggerFactory.getLogger(MemDatabase.class);
 
     private final int BYTE_SIZE_1MB = 1_000_000;
     private final int BYTE_SIZE_1GB = 1_000_000_000;
 
     private final DatabaseManager databaseManager = new DatabaseManager();
-    private final Random random = new Random();
 
     // Use when searching or using later?
     private final ArrayList<Table> tables = new ArrayList<Table>();
@@ -36,7 +35,7 @@ public class MyDatabase {
     private char[] baseCar;
     private byte[] byteBase;
 
-    public MyDatabase(int tables, int rows, int size) {
+    public MemDatabase(int tables, int rows, int size) {
         this.maxTables = tables;
         this.maxRowsPerTable = rows;
         this.maxDataPerRow = size;
@@ -49,13 +48,15 @@ public class MyDatabase {
     }
 
 
-    public Database build(String dbName) {
+    public long write(String dbName) {
         Instant instant1 = Instant.now();
         Database database = databaseManager.createDatabase(dbName);
+
+        AtomicLong bytesWritten = new AtomicLong();
         for (int t = 1; t <= maxTables; t++) {
 
             String tableName = String.format("table_%d", t);
-            log.info("Creating table \"{}\"", tableName);
+            log.debug("Creating table \"{}\"", tableName);
 
             Table table = database.createTable(tableName);
 
@@ -64,6 +65,7 @@ public class MyDatabase {
                 HashMap<String, ByteBuffer> map = new HashMap<String, ByteBuffer>();
                 for (int m = 1; m <= maxDataPerRow; m++) {
                     map.put(randomString(), randomBytes());
+                    bytesWritten.addAndGet(byteBase.length);
                 }
                 table.insertEntry(rowIdx, map);
             }
@@ -72,9 +74,39 @@ public class MyDatabase {
         }
 
         Instant instant2 = Instant.now();
-        log.info("Done building in-memory database \"{}\" in {}", dbName, Duration.between(instant1, instant2));
-        return database;
+        Duration duration = Duration.between(instant1, instant2);
+        log.info("Done writing {} bytes -> \"{}\" in {}", bytesWritten, dbName, duration);
+
+        return duration.toMillis();
     }
+
+
+    public long read(String dbName) {
+        Instant instant1 = Instant.now();
+        Database database = databaseManager.getDatabase(dbName);
+
+        AtomicLong bytesRead = new AtomicLong();
+        for(Table table : tables) {
+            table.getRows().forEach((idx, row) -> {
+                HashMap<String, ByteBuffer> values = row.getColumnValuesMap();
+                values.forEach((str, byteBuffer) -> {
+                    byteBuffer.rewind();
+                    while (byteBuffer.hasRemaining()) {
+                        byte[] tmp = new byte[BYTE_SIZE_1MB];
+                        byteBuffer.get(tmp);
+                        bytesRead.addAndGet(tmp.length);
+                    }
+                });
+            });
+        }
+        Instant instant2 = Instant.now();
+        Duration duration = Duration.between(instant1, instant2);
+        log.info("Done reading {} bytes <- \"{}\" in {}", bytesRead.get(), dbName, duration);
+
+        return duration.toMillis();
+    }
+
+
 
     String randomString() {
         baseCar[(idx++) % 128]++;
